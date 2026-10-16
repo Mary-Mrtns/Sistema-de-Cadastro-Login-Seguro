@@ -37,8 +37,36 @@ def validar_senha(senha):
 
     return (True, "Senha válida")
 
+def validar_cadastro(usuario, email, senha, confirmacao):
+    # Regra: nenhum campo pode ficar vazio
+    if (campo_vazio(usuario) or campo_vazio(email)
+            or campo_vazio(senha) or campo_vazio(confirmacao)):
+        return (False, "Preencha todos os campos.")
+
+    # Regra: a senha precisa atender aos critérios
+    senha_ok, mensagem = validar_senha(senha)
+    if not senha_ok:
+        return (False, mensagem)
+
+    # Regra: a confirmação precisa ser igual à senha
+    if senha != confirmacao:
+        return (False, "A confirmação não é igual à senha.")
+
+    return (True, "Dados válidos.")        
+
 def criar_conta():
-    print("\n[Cadastro] Ainda será feito\n")
+    print("\n--- Cadastro ---")
+    usuario = input("Nome de usuário: ").strip()
+    email = input("E-mail: ").strip()
+    senha = input("Senha: ")
+    confirmacao = input("Confirme a senha: ")
+
+    valido, mensagem = validar_cadastro(usuario, email, senha, confirmacao)
+
+    if valido:
+        print("\n[OK] " + mensagem + " (ainda não salvo, isso vou programar depois)\n")
+    else:
+        print("\n[ERRO]" + mensagem + "\n")
 
 def entrar():
     print("\n[Login] Ainda será feito\n")
