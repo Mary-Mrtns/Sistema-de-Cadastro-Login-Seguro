@@ -1,7 +1,10 @@
 # Lista global: cada usuário será um dicionário, por exemplo:
 # {"usuario": "mary", "email": "mary@email.com", "senha": "..."}
 # Atenção: os dados ficam só na memória e somem quando o programa fecha.
-usuarios = []
+usuarios = [
+    {"usuario": "mary", "email": "mary@email.com", "senha": "DADO_DE_SENHA_PROTEGIDO"},
+    {"usuario": "ana", "email": "ana@email.com", "senha": "DADO_DE_SENHA_PROTEGIDO"},
+]
 
 def mostrar_menu():
     print("=" * 36)
@@ -11,6 +14,18 @@ def mostrar_menu():
     print("2 - Entrar")
     print("0 - Sair do programa")
     print("-" * 36)
+
+def usuario_existe(usuario):
+    for pessoa in usuarios:
+        if pessoa["usuario"].lower() == usuario.lower():
+            return True      # achou: encerra a função na hora
+    return False             # só chega aqui se o for terminou sem achar
+
+def email_existe(email):
+    for pessoa in usuarios:
+        if pessoa["email"].lower() == email.lower():
+            return True
+    return False
 
 def campo_vazio(texto):
     # strip() remove espaços; se sobrar nada, o campo está vazio
@@ -42,6 +57,11 @@ def validar_cadastro(usuario, email, senha, confirmacao):
     if (campo_vazio(usuario) or campo_vazio(email)
             or campo_vazio(senha) or campo_vazio(confirmacao)):
         return (False, "Preencha todos os campos.")
+
+    if usuario_existe(usuario):
+        return (False, "Esse nome de usuário já está em uso.")
+    if email_existe(email):
+        return (False, "Esse e-mail já está cadastrado.")
 
     # Regra: a senha precisa atender aos critérios
     senha_ok, mensagem = validar_senha(senha)
