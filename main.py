@@ -1,10 +1,8 @@
-# Lista global: cada usuário será um dicionário, por exemplo:
-# {"usuario": "mary", "email": "mary@email.com", "senha": "..."}
-# Atenção: os dados ficam só na memória e somem quando o programa fecha.
-usuarios = [
-    {"usuario": "mary", "email": "mary@email.com", "senha": "DADO_DE_SENHA_PROTEGIDO"},
-    {"usuario": "ana", "email": "ana@email.com", "senha": "DADO_DE_SENHA_PROTEGIDO"},
-]
+import hashlib
+import getpass
+import secrets
+
+usuarios = []
 
 def mostrar_menu():
     print("=" * 36)
@@ -78,18 +76,42 @@ def criar_conta():
     print("\n--- Cadastro ---")
     usuario = input("Nome de usuário: ").strip()
     email = input("E-mail: ").strip()
-    senha = input("Senha: ")
-    confirmacao = input("Confirme a senha: ")
+    senha = getpass.getpass("Senha (não aparece na tela): ")
+    confirmacao = getpass.getpass("Confirme a senha: ")
 
     valido, mensagem = validar_cadastro(usuario, email, senha, confirmacao)
 
     if valido:
-        print("\n[OK] " + mensagem + " (ainda não salvo, isso vou programar depois)\n")
+        cadastrar_usuario(usuario, email, senha)
+        print("\n[OK] Conta criada com sucesso!\n")
     else:
         print("\n[ERRO]" + mensagem + "\n")
 
 def entrar():
     print("\n[Login] Ainda será feito\n")
+
+def proteger_senha(senha, sal):
+    # .encode() converte texto em bytes, que é o que o hashlib exige
+    resultado = hashlib.pbkdf2_hmac(
+        "sha256",
+        senha.encode("utf-8"),
+        sal.encode("utf-8"),
+        600000
+    )
+    # .hex() transforma o resultado em texto legível (64 caracteres)
+    return resultado.hex()
+
+def cadastrar_usuario(usuario, email, senha):
+    sal = secrets.token_hex(16)                   # sal aleatório e único
+    senha_protegida = proteger_senha(senha, sal)
+
+    novo_usuario = {
+        "usuario": usuario,
+        "email": email,
+        "senha": senha_protegida,                  # NUNCA a senha original
+        "sal": sal
+    }
+    usuario.append(novo_usuario)
 
 def main():
     opcao = ""
