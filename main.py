@@ -3,6 +3,8 @@ import getpass
 import secrets
 
 usuarios = []
+MAX_TENTATIVA = 3
+tentativas_falhas = {}
 
 def mostrar_menu():
     print("=" * 36)
@@ -12,6 +14,63 @@ def mostrar_menu():
     print("2 - Entrar")
     print("0 - Sair do programa")
     print("-" * 36)
+
+def buscar_usuario(nome):
+    for pessoa in usuarios:
+        if pessoa["usuario"].lower() == nome.lower():
+            return pessoa
+    return None 
+
+def login_bloqueado(nome):
+    chave = nome.lower()
+    if chave in tentativas_falhas:
+        return tentativas_falhas[chave] >= MAX_TENTATIVA 
+    return False
+
+def tentativas_restantes(nome):
+    chave = nome.lower()
+    if chave in tentativas_falhas:
+        return MAX_TENTATIVA - tentativas_falhas[chave]
+    return MAX_TENTATIVA
+
+def registrar_falhas(nome):
+    chave = nome.lower()
+    if chave in tentativas_falhas:
+        tentativas_falhas[chave] = tentativas_falhas[chave] + 1
+    else:
+        tentativas_falhas[chave] = 1
+
+def limpar_falhas(nome):
+    chave = nome.lower()
+    if chave in tentativas_falhas:
+        tentativas_falhas[chave] = 0
+
+def falha_de_login(nome):
+    registrar_falhas(nome)
+    if login_bloqueado(nome):
+        return (False, "Muitas tentativas. Login bloqueado até reiniciar o programa")
+    restantes = tentativas_restantes(nome)
+    return (False, "Usuário ou senha incorretos. Tentativas restantes: " + str(restantes))
+
+def realizar_login(usuario, senha):
+    if login_bloqueado(usuario):
+        return (False, "Muitas tentativas. Login bloqueado até reiniciar o programa.")
+
+    pessoa = buscar_usuario(usuario)
+
+    if pessoa is None:
+        # Usuário não existe: faz a mesma conta mesmo assim, para a
+        # resposta demorar o mesmo tempo e não entregar que ele não existe
+        proteger_senha(senha, "sal_falso")
+        return falha_de_login(usuario)
+
+    hash_digitado = proteger_senha(senha, pessoa["sal"])
+
+    if hash_digitado == pessoa["senha"]:
+        limpar_falhas(usuario)
+        return (True, "Login realizado com sucesso.")
+
+    return falha_de_login(usuario)
 
 def usuario_existe(usuario):
     for pessoa in usuarios:
@@ -88,7 +147,23 @@ def criar_conta():
         print("\n[ERRO]" + mensagem + "\n")
 
 def entrar():
-    print("\n[Login] Ainda será feito\n")
+    print("\n--- Login (Enter vazio no usuário para voltar) ---")
+    while True:
+        usuario = input("Usuário: ").strip()
+        if campo_vazio(usuario):
+            print("\nVoltando ao menu.\n")
+            return
+
+        senha = getpass.getpass("Senha (não aparece na tela): ")
+        ok, mensagem = realizar_login(usuario, senha)
+
+        if ok:
+            print("\n[OK] " + mensagem + " (a área restrita vou adicionar depois)\n")
+            return
+
+        print("\n[ERRO] " + mensagem + "\n")
+        if login_bloqueado(usuario):
+            return
 
 def proteger_senha(senha, sal):
     # .encode() converte texto em bytes, que é o que o hashlib exige
