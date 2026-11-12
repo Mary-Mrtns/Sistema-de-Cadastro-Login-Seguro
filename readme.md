@@ -33,7 +33,7 @@
 
 ---
 
-## ⚙️ Como Executar
+## Como Executar
 
 ### Pré-requisitos
 - Python 3.7 ou superior instalado.
