@@ -6,7 +6,7 @@
 
 ## Funcionalidades
 
-- **Cadastro de Usuários**: Validação de campos obrigatórios, verificação de duplicidade de usuário e e-mail.
+**Cadastro de Usuários**: Validação de campos obrigatórios, verificação de duplicidade de usuário e e-mail.
 - **Validação de Senhas Fortes**:
   - Mínimo de 8 caracteres.
   - Exigência de pelo menos uma letra e um número.
